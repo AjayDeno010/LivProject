@@ -1,0 +1,85 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.1.0'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'io.qameta.allure' version '2.11.2'
+}
+
+group = 'com.m2p.livQuik'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'io.rest-assured:rest-assured:5.3.0'
+	implementation 'com.github.javafaker:javafaker:1.0.2'
+	implementation 'org.assertj:assertj-core:3.24.2'
+	implementation 'io.rest-assured:json-schema-validator:4.3.0'
+//	implementation 'io.qameta.allure:allure-testng:2.21.0'
+	testImplementation 'org.testng:testng:7.7.1'
+	implementation 'mysql:mysql-connector-java:8.0.32'
+	testImplementation 'org.postgresql:postgresql'
+	implementation 'io.qameta.allure:allure-rest-assured:2.21.0'
+	testImplementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
+	implementation 'com.google.code.gson:gson:2.10.1'
+
+}
+
+task e2eTest(type: Test) {
+	var env = System.getenv("spring_profiles_active") != null ? System.getenv("spring_profiles_active") : "dev";
+	systemProperty 'spring.profiles.active', env
+//	println("this test is running on {" + env + "} profile, make sure you have passed correct application and db credentials");
+//	if (!"dev".equalsIgnoreCase(env) && !"uat".equalsIgnoreCase(env) && !"pp".equalsIgnoreCase(env) && !"qa".equalsIgnoreCase(env)){
+//		throw new GradleException('Oops! Provide correct environment from these options [dev|qa|uat|pp]')
+//	}
+	useTestNG(){
+		outputDirectory = file("$project.buildDir//testngOutput")
+		useDefaultListeners = true
+		suites "src/test/testNgConfig/testng-${env}.xml"
+	}
+
+//	testLogging {
+//		// set options for log level LIFECYCLE
+//		events TestLogEvent.FAILED,
+//				TestLogEvent.PASSED,
+//				TestLogEvent.SKIPPED,
+//				TestLogEvent.STANDARD_OUT
+//		exceptionFormat TestExceptionFormat.FULL
+//		showExceptions true
+//		showCauses true
+//		showStackTraces true
+//
+//		// set options for log level DEBUG and INFO
+//		debug {
+//			events TestLogEvent.STARTED,
+//					TestLogEvent.FAILED,
+//					TestLogEvent.PASSED,
+//					TestLogEvent.SKIPPED,
+//					TestLogEvent.STANDARD_ERROR,
+//					TestLogEvent.STANDARD_OUT
+//			exceptionFormat TestExceptionFormat.FULL
+//		}
+//		info.events = debug.events
+//		info.exceptionFormat = debug.exceptionFormat
+//
+//		afterSuite { desc, result ->
+//			if (!desc.parent) { // will match the outermost suite
+//				def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
+//				def startItem = '|  ', endItem = '  |'
+//				def repeatLength = startItem.length() + output.length() + endItem.length()
+//				println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+//			}
+//		}
+//	}
+}
